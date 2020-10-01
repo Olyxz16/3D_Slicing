@@ -50,6 +50,9 @@ public class SlicerScript : MonoBehaviour
 
         Destroy(object_To_Slice);
 
+        Debug.Log(new_left_gameObject.transform.position);
+        Debug.Log(new_right_gameObject.transform.position);
+
         return new GameObject[] {new_left_gameObject, new_right_gameObject};
 
         //float endTime = Time.realtimeSinceStartup;
@@ -57,7 +60,9 @@ public class SlicerScript : MonoBehaviour
 
     }
 
-    public GameObject[] Slice(GameObject obj, Transform sli = default, int new_layer = -1) {  
+    public GameObject[] Slice(GameObject obj, Transform sli = default, int new_layer = -1) {
+        if(sli == default)
+            sli = this.transform;
         return Slice(obj, sli.right, sli.position, new_layer);
     }
 
@@ -413,7 +418,7 @@ public class SlicerScript : MonoBehaviour
             new_object.GetComponent<Rigidbody>().velocity = object_To_Slice.GetComponent<Rigidbody>().velocity;
             new_object.GetComponent<Rigidbody>().angularVelocity = object_To_Slice.GetComponent<Rigidbody>().angularVelocity;
             new_object.GetComponent<Rigidbody>().centerOfMass = Vector3.zero;
-            new_object.GetComponent<Rigidbody>().ResetCenterOfMass();
+            //new_object.GetComponent<Rigidbody>().ResetCenterOfMass();
         }
 
         if(layer == -1) 
