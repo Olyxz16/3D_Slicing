@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using TMPro;    
+using UnityEngine;   
 
 
 public class SlicerScript : MonoBehaviour
@@ -50,9 +49,6 @@ public class SlicerScript : MonoBehaviour
 
         Destroy(object_To_Slice);
 
-        Debug.Log(new_left_gameObject.transform.position);
-        Debug.Log(new_right_gameObject.transform.position);
-
         return new GameObject[] {new_left_gameObject, new_right_gameObject};
 
         //float endTime = Time.realtimeSinceStartup;
@@ -92,6 +88,7 @@ public class SlicerScript : MonoBehaviour
         object_To_Slice = obj;
         parent = object_To_Slice.transform.parent;
         mesh = obj.GetComponent<MeshFilter>().mesh;
+        object_To_Slice.GetComponent<Collider>().enabled = false;
 
         normal = norm;
         point = pt;
@@ -101,7 +98,7 @@ public class SlicerScript : MonoBehaviour
             Vector3 v = mesh_vertices[i];
             v = new Vector3(v.x * object_To_Slice.transform.localScale.x, v.y * object_To_Slice.transform.localScale.y, v.z * object_To_Slice.transform.localScale.z);
             v = object_To_Slice.transform.rotation * v;
-            v = v + object_To_Slice.transform.position;
+            v = v+ object_To_Slice.transform.position;       
             mesh_vertices[i] = new Vector3(v.x, v.y, v.z);
         }
            
@@ -417,8 +414,7 @@ public class SlicerScript : MonoBehaviour
             new_object.GetComponent<MeshCollider>().convex = true;
             new_object.GetComponent<Rigidbody>().velocity = object_To_Slice.GetComponent<Rigidbody>().velocity;
             new_object.GetComponent<Rigidbody>().angularVelocity = object_To_Slice.GetComponent<Rigidbody>().angularVelocity;
-            new_object.GetComponent<Rigidbody>().centerOfMass = Vector3.zero;
-            //new_object.GetComponent<Rigidbody>().ResetCenterOfMass();
+            new_object.GetComponent<Rigidbody>().ResetCenterOfMass();
         }
 
         if(layer == -1) 
@@ -550,8 +546,11 @@ public class SlicerScript : MonoBehaviour
         return com;
     }
 
-    Vector3 Compute_Center_Of_Mass(Vector3[] vertices) {
+    Vector3 Compute_Center_Of_Mass(Vector3[] vertices, Vector3 offset) {
 
+        for(int i = 0 ; i < vertices.Length ; i++) 
+            vertices[i] += offset;
+        
         Vector3 min_values = vertices[0];
         Vector3 max_values = vertices[0];
         foreach(Vector3 v in vertices) {
