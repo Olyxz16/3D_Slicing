@@ -35,9 +35,6 @@ public class SlicerScript : MonoBehaviour
     
     public GameObject[] Slice(GameObject obj, Vector3 normal, Vector3 point, int new_layer = -1) {
 
-        float t = Time.realtimeSinceStartup;
-        int n = obj.GetComponent<MeshFilter>().mesh.vertices.Length;
-
         Initialize_Mesh(obj, normal, point);
         Compute_Plane();
         Compute_Mesh_Vertices();
@@ -50,9 +47,6 @@ public class SlicerScript : MonoBehaviour
         Destroy(object_To_Slice);
 
         return new GameObject[] {new_left_gameObject, new_right_gameObject};
-
-        //float endTime = Time.realtimeSinceStartup;
-        //Debug.Log(endTime - t + " " + n);
 
     }
 
@@ -87,7 +81,7 @@ public class SlicerScript : MonoBehaviour
 
         object_To_Slice = obj;
         parent = object_To_Slice.transform.parent;
-        mesh = obj.GetComponent<MeshFilter>().mesh;
+        mesh = object_To_Slice.GetComponent<MeshFilter>().mesh;
         object_To_Slice.GetComponent<Collider>().enabled = false;
 
         normal = norm;
@@ -175,11 +169,11 @@ public class SlicerScript : MonoBehaviour
         
         if(s[0] == 1 && s[1] == 1 && s[2] == 1) {
             right_mesh_vertices.AddRange(v);
-            Add_Triangle_Indice_Right(0,1,2);
+            Add_Triangle_Indice_Right();
         }
         else if(s[0] == 0 && s[1] == 0 && s[2] == 0) {
             left_mesh_vertices.AddRange(v);
-            Add_Triangle_Indice_Left(0,1,2);
+            Add_Triangle_Indice_Left();
         }
         
         else if(s[0] == 1 && s[1] == 1 && s[2] == 0) {                 
@@ -190,9 +184,9 @@ public class SlicerScript : MonoBehaviour
             new_vertices.Add(Inter(v[0], v[2]));
             new_vertices.Add(Inter(v[1], v[2]));
 
-            Add_Triangle_Indice_Left(0,1,2);
-            Add_Triangle_Indice_Right(0,1,2);
-            Add_Triangle_Indice_Right(0,1,2);
+            Add_Triangle_Indice_Left();
+            Add_Triangle_Indice_Right();
+            Add_Triangle_Indice_Right();
         }
         else if(s[0] == 1 && s[1] == 0 && s[2] == 1) {          
             Add_Triangle_Vertices_Left(v[1], Inter(v[1], v[2]), Inter(v[0], v[1]));
@@ -202,9 +196,9 @@ public class SlicerScript : MonoBehaviour
             new_vertices.Add(Inter(v[0], v[1]));
             new_vertices.Add(Inter(v[1], v[2]));
 
-            Add_Triangle_Indice_Left(0,1,2);
-            Add_Triangle_Indice_Right(0,1,2);
-            Add_Triangle_Indice_Right(0,1,2); 
+            Add_Triangle_Indice_Left();
+            Add_Triangle_Indice_Right();
+            Add_Triangle_Indice_Right(); 
         } 
         else if(s[0] == 0 && s[1] == 1 && s[2] == 1) {              
             Add_Triangle_Vertices_Left(v[0], Inter(v[0], v[1]), Inter(v[0], v[2]));
@@ -214,9 +208,9 @@ public class SlicerScript : MonoBehaviour
             new_vertices.Add(Inter(v[0], v[1]));
             new_vertices.Add(Inter(v[0], v[2]));
 
-            Add_Triangle_Indice_Left(0,1,2);
-            Add_Triangle_Indice_Right(0,1,2);
-            Add_Triangle_Indice_Right(0,1,2);
+            Add_Triangle_Indice_Left();
+            Add_Triangle_Indice_Right();
+            Add_Triangle_Indice_Right();
         }
 
 
@@ -229,9 +223,9 @@ public class SlicerScript : MonoBehaviour
             new_vertices.Add(Inter(v[0], v[1]));
             new_vertices.Add(Inter(v[0], v[2]));
 
-            Add_Triangle_Indice_Right(0,1,2);
-            Add_Triangle_Indice_Left(0,1,2);
-            Add_Triangle_Indice_Left(0,1,2);
+            Add_Triangle_Indice_Right();
+            Add_Triangle_Indice_Left();
+            Add_Triangle_Indice_Left();
         } 
         else if(s[0] == 0 && s[1] == 1 && s[2] == 0) {         
             Add_Triangle_Vertices_Right(v[1], Inter(v[1], v[2]), Inter(v[0], v[1]));
@@ -241,9 +235,9 @@ public class SlicerScript : MonoBehaviour
             new_vertices.Add(Inter(v[0], v[1]));
             new_vertices.Add(Inter(v[1], v[2]));
 
-            Add_Triangle_Indice_Right(0,1,2);  
-            Add_Triangle_Indice_Left(0,1,2); 
-            Add_Triangle_Indice_Left(0,1,2);    
+            Add_Triangle_Indice_Right();  
+            Add_Triangle_Indice_Left(); 
+            Add_Triangle_Indice_Left();    
         } 
         else if(s[0] == 0 && s[1] == 0 && s[2] == 1) {
             Add_Triangle_Vertices_Right(v[2], Inter(v[0], v[2]), Inter(v[1], v[2]));
@@ -253,9 +247,9 @@ public class SlicerScript : MonoBehaviour
             new_vertices.Add(Inter(v[0], v[2])); 
             new_vertices.Add(Inter(v[1], v[2]));
 
-            Add_Triangle_Indice_Right(0,1,2);
-            Add_Triangle_Indice_Left(0,1,2);
-            Add_Triangle_Indice_Left(0,1,2);
+            Add_Triangle_Indice_Right();
+            Add_Triangle_Indice_Left();
+            Add_Triangle_Indice_Left();
         }
 
 
@@ -354,19 +348,20 @@ public class SlicerScript : MonoBehaviour
 
         for(int i = 0 ; i < new_vertices.Count-1 ; i++) {
 
-            Add_Triangle_Vertices_Right(centroid, new_vertices[i], new_vertices[i+1]);
+            Add_Triangle_Vertices_Right(new_vertices[i+1], new_vertices[i], centroid);
             Add_Triangle_Vertices_Left(centroid, new_vertices[i], new_vertices[i+1]);
 
-            Add_Triangle_Indice_Right(2,1,0);
-            Add_Triangle_Indice_Left(0,1,2);
+            Add_Triangle_Indice_Right();
+            Add_Triangle_Indice_Left();
+
 
         }
 
-        Add_Triangle_Vertices_Right(centroid, new_vertices[new_vertices.Count-1], new_vertices[0]);
+        Add_Triangle_Vertices_Right(new_vertices[0], new_vertices[new_vertices.Count-1], centroid);
         Add_Triangle_Vertices_Left(centroid, new_vertices[new_vertices.Count-1], new_vertices[0]);
 
-        Add_Triangle_Indice_Right(2,1,0);
-        Add_Triangle_Indice_Left(0,1,2);
+        Add_Triangle_Indice_Right();
+        Add_Triangle_Indice_Left();
 
     }
 
@@ -537,46 +532,6 @@ public class SlicerScript : MonoBehaviour
     }
 
 
-    Vector3 Compute_Centroid(Vector3[] vertices) {
-        Vector3 com = Vector3.zero;
-        foreach(Vector3 v in vertices) {
-            com += v;
-        }
-        com /= vertices.Length;
-        return com;
-    }
-
-    Vector3 Compute_Center_Of_Mass(Vector3[] vertices, Vector3 offset) {
-
-        for(int i = 0 ; i < vertices.Length ; i++) 
-            vertices[i] += offset;
-        
-        Vector3 min_values = vertices[0];
-        Vector3 max_values = vertices[0];
-        foreach(Vector3 v in vertices) {
-
-            if(v.x < min_values.x)
-                min_values.x = v.x;
-            if(v.y < min_values.y)
-                min_values.y = v.y;
-            if(v.z < min_values.z)
-                min_values.z = v.z;
-            
-            if(v.x > max_values.x)
-                max_values.x = v.x;
-            if(v.y > max_values.y)
-                max_values.y = v.y;
-            if(v.z > max_values.z)
-                max_values.z = v.z;
-
-        }
-
-        Vector3 com = new Vector3((min_values.x + max_values.x)/2, (min_values.y + max_values.y)/2, (min_values.z + max_values.z)/2);
-        return com;
-
-    }
-
-
     void Add_Triangle_Vertices_Left(Vector3 v1, Vector3 v2, Vector3 v3) {
         left_mesh_vertices.Add(v1);
         left_mesh_vertices.Add(v2);
@@ -587,21 +542,21 @@ public class SlicerScript : MonoBehaviour
         right_mesh_vertices.Add(v2);
         right_mesh_vertices.Add(v3);
     }
-    void Add_Triangle_Indice_Left(int i1, int i2, int i3) {
-        left_mesh_triangle_indice.Add(i1 + left_indice_offset);
-        left_mesh_triangle_indice.Add(i2 + left_indice_offset);
-        left_mesh_triangle_indice.Add(i3 + left_indice_offset);
+    void Add_Triangle_Indice_Left() {
+        left_mesh_triangle_indice.Add(0 + left_indice_offset);
+        left_mesh_triangle_indice.Add(1 + left_indice_offset);
+        left_mesh_triangle_indice.Add(2 + left_indice_offset);
         left_indice_offset+=3;
     }
-    void Add_Triangle_Indice_Right(int i1, int i2, int i3) {
-        right_mesh_triangle_indice.Add(i1 + right_indice_offset);
-        right_mesh_triangle_indice.Add(i2 + right_indice_offset);
-        right_mesh_triangle_indice.Add(i3 + right_indice_offset);
+    void Add_Triangle_Indice_Right() {
+        right_mesh_triangle_indice.Add(0 + right_indice_offset);
+        right_mesh_triangle_indice.Add(1 + right_indice_offset);
+        right_mesh_triangle_indice.Add(2 + right_indice_offset);
         right_indice_offset+=3;
     }
 
 
-    void Add_New_Triangles_Indice_Right(int i1, int i2, int i3) {
+    /*void Add_New_Triangles_Indice_Right(int i1, int i2, int i3) {
         new_right_triangle_indice.Add(i1 + new_right_indice_offset);
         new_right_triangle_indice.Add(i2 + new_right_indice_offset);
         new_right_triangle_indice.Add(i3 + new_right_indice_offset);
@@ -612,7 +567,7 @@ public class SlicerScript : MonoBehaviour
         new_left_triangle_indice.Add(i2 + new_left_indice_offset);
         new_left_triangle_indice.Add(i3 + new_left_indice_offset);
         new_left_indice_offset+=3;
-    }
+    }*/
 
 
     #endregion
