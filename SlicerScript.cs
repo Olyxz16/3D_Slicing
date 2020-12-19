@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;   
 
@@ -8,24 +8,22 @@ public class SlicerScript : MonoBehaviour
     
     
     GameObject object_To_Slice;
-    Transform parent;
-    Mesh mesh;
+
     Vector3[] mesh_vertices;
-    int[] mesh_triangles_indice;
-    int[] mesh_state;
+    int[] mesh_triangles_indice;//
+    int[] mesh_state;//
+
+    List<int[]> submeshes_triangles_indice;  ////////////////////////////|\
+    List<int[]> submeshes_triangles_state;   ////////////////////////////|\
 
     float[] plane_values;
     Vector3 normal, point;
 
-    List<Vector3> right_mesh_vertices, left_mesh_vertices;
-    List<Vector3> new_vertices;
+    List<Vector3> right_mesh_vertices, left_mesh_vertices, new_vertices;
     List<int> right_mesh_triangle_indice, left_mesh_triangle_indice;
-    List<int> new_right_triangle_indice, new_left_triangle_indice;
+    List<int> new_right_triangle_indice, new_left_triangle_indice;  //
     int right_indice_offset, left_indice_offset, new_right_indice_offset, new_left_indice_offset;
 
-    Vector3 right_center_of_mass, left_center_of_mass;
-
-    Mesh new_right_mesh, new_left_mesh;
     GameObject new_left_gameObject, new_right_gameObject;
 
 
@@ -80,8 +78,7 @@ public class SlicerScript : MonoBehaviour
     void Initialize_Mesh (GameObject obj, Vector3 norm, Vector3 pt) {  
 
         object_To_Slice = obj;
-        parent = object_To_Slice.transform.parent;
-        mesh = object_To_Slice.GetComponent<MeshFilter>().mesh;
+        Mesh mesh = object_To_Slice.GetComponent<MeshFilter>().mesh;
         object_To_Slice.GetComponent<Collider>().enabled = false;
 
         normal = norm;
@@ -92,11 +89,14 @@ public class SlicerScript : MonoBehaviour
             Vector3 v = mesh_vertices[i];
             v = new Vector3(v.x * object_To_Slice.transform.localScale.x, v.y * object_To_Slice.transform.localScale.y, v.z * object_To_Slice.transform.localScale.z);
             v = object_To_Slice.transform.rotation * v;
-            v = v+ object_To_Slice.transform.position;       
+            v = v + object_To_Slice.transform.position;       
             mesh_vertices[i] = new Vector3(v.x, v.y, v.z);
         }
            
         mesh_triangles_indice = mesh.triangles;
+        submeshes_triangles_indice = new List<int[]>();              ///////////////////////////////////////
+        for(int i = 0 ; i < mesh.subMeshCount ; i++)                 ///////////////////////////////////////
+            submeshes_triangles_indice.Add(mesh.GetTriangles(i));         ///////////////////////////////////////
 
         right_mesh_vertices = new List<Vector3>();
         left_mesh_vertices = new List<Vector3>();
@@ -126,7 +126,6 @@ public class SlicerScript : MonoBehaviour
 
 
     void Compute_Mesh_Vertices() {
-
         Vector3[] temp = new Vector3[mesh_triangles_indice.Length];
         for(int i = 0 ; i < mesh_triangles_indice.Length/3 ; i++) {
             temp[3*i] = mesh_vertices[mesh_triangles_indice[3*i]];
@@ -134,7 +133,6 @@ public class SlicerScript : MonoBehaviour
             temp[3*i+2] = mesh_vertices[mesh_triangles_indice[3*i+2]];
         }
         mesh_vertices = temp;
-
     }
 
     void Compute_Mesh_State() {
@@ -372,15 +370,15 @@ public class SlicerScript : MonoBehaviour
     #region New_Object_Creation
 
     void Create_New_Objects(int layer) {
-            new_right_gameObject = Create_New_Object(right_mesh_vertices, right_mesh_triangle_indice, new_right_triangle_indice, layer);
-            new_left_gameObject = Create_New_Object(left_mesh_vertices, left_mesh_triangle_indice, new_left_triangle_indice, layer);
+            new_right_gameObject = Create_New_Object(right_mesh_vertices, right_mesh_triangle_indice , layer);
+            new_left_gameObject = Create_New_Object(left_mesh_vertices, left_mesh_triangle_indice , layer);
     }
     void Create_New_Objects(Material mat, int layer) {
             new_right_gameObject = Create_New_Object(right_mesh_vertices, right_mesh_triangle_indice, new_right_triangle_indice, mat, layer);
             new_left_gameObject = Create_New_Object(left_mesh_vertices, left_mesh_triangle_indice, new_left_triangle_indice, mat, layer);
     }
 
-    GameObject Create_New_Object(List<Vector3> vertices, List<int> triangles, List<int> new_triangles, int layer) {
+    GameObject Create_New_Object(List<Vector3> vertices, List<int> triangles, int layer) {  //, List<int> new_triangles
 
         Mesh new_mesh = new Mesh();
         for(int i = 0 ; i < vertices.Count ; i++) {
@@ -416,7 +414,7 @@ public class SlicerScript : MonoBehaviour
             new_object.layer = object_To_Slice.layer;
         else
             new_object.layer = layer;
-        new_object.transform.parent = parent;
+        new_object.transform.parent = object_To_Slice.transform.parent;
 
         return new_object;
 
@@ -500,7 +498,7 @@ public class SlicerScript : MonoBehaviour
             new_object.layer = object_To_Slice.layer;
         else
             new_object.layer = layer;
-        new_object.transform.parent = parent;
+        new_object.transform.parent = object_To_Slice.transform.parent;
 
         return new_object;
 
@@ -512,7 +510,7 @@ public class SlicerScript : MonoBehaviour
 
     #region tools
 
-    float Solve(Vector3 point) {   
+    float Solve(Vector3 point) {
         return plane_values[0]*point.x + plane_values[1]*point.y + plane_values[2]*point.z + plane_values[3];
     }
 
